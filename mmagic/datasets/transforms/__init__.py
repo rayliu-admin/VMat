@@ -19,7 +19,7 @@ from .generate_assistant import (GenerateCoordinateAndCell,
 from .generate_frame_indices import (GenerateFrameIndices,
                                      GenerateFrameIndiceswithPadding,
                                      GenerateSegmentIndices)
-from .get_masked_image import GetMaskedImage
+from .get_masked_image import GetMaskedImage, LoadCoarseMasks
 from .loading import (GetSpatialDiscountMask, LoadImageFromFile, LoadMask,
                       LoadPairedImageFromFile)
 from .matlab_like_resize import MATLABLikeResize
@@ -32,7 +32,7 @@ from .trimap import (FormatTrimap, GenerateTrimap,
                      GenerateTrimapWithDistTransform, TransformTrimap)
 from .values import CopyValues, SetValues
 
-__all__ = [
+__all__ = ['LoadCoarseMasks', 
     'BinarizeImage', 'Clip', 'ColorJitter', 'CopyValues', 'Crop', 'CropLike',
     'DegradationsWithShuffle', 'LoadImageFromFile', 'LoadMask', 'Flip',
     'FixedCrop', 'GenerateCoordinateAndCell', 'GenerateFacialHeatmap',

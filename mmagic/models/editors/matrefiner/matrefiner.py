@@ -33,7 +33,6 @@ class MATREFINER(BaseMattor):
     """
 
     def __init__(self,
-                 task,
                  step,
                  diffusion_cfg,
                  data_preprocessor,
@@ -48,8 +47,7 @@ class MATREFINER(BaseMattor):
             init_cfg=init_cfg,
             train_cfg=train_cfg,
             test_cfg=test_cfg)
-        
-        self.task = task
+
         self._diffusion_init(diffusion_cfg)
         self.step = step
         self.loss_alpha = MODELS.build(loss_alpha)
@@ -71,7 +69,8 @@ class MATREFINER(BaseMattor):
                 data_samples: DataSamples = None,
                 mode: str = 'tensor') -> List[DataSample]:
         if mode == 'tensor':
-            raw = self._forward(inputs)
+            t = data_samples.t
+            raw = self._forward(inputs,t)
             return raw
         elif mode == 'predict':
             # Pre-process runs in runner
@@ -95,7 +94,7 @@ class MATREFINER(BaseMattor):
         Returns:
             Tensor: Output tensor.
         """
-        raw_alpha = self.backbone(inputs,timesteps)
+        raw_alpha = self.backbone(inputs, timesteps)
         return raw_alpha
 
     def p_sample(self, model_input, cur_fine_probs, t):
@@ -108,7 +107,7 @@ class MATREFINER(BaseMattor):
         cur_fine_probs = cur_fine_probs + (1 - cur_fine_probs) * p_c_to_f
         return pred_logits, cur_fine_probs
 
-    def _forward_test(self, inputs):
+    def _forward_test(self, inputs, data_samples, use_last_step=True):
         """Forward function for testing GCA model.
 
         Args:
@@ -119,10 +118,12 @@ class MATREFINER(BaseMattor):
         """
         indices = list(range(self.num_timesteps))[::-1]
         indices = indices[:self.step]
+        current_device = inputs.device
+        x_last = data_samples.coarse_mask
         for i in indices:
             t = torch.tensor([i] * x.shape[0], device=current_device)
             last_step_flag = (use_last_step and i==indices[-1])
-            model_input = torch.cat((img, x), dim=1)
+            model_input = torch.cat((inputs, x), dim=1)
             x, cur_fine_probs = self.p_sample(model_input, cur_fine_probs, t)
 
             if last_step_flag:
@@ -147,7 +148,6 @@ class MATREFINER(BaseMattor):
         Returns:
             dict: Contains the loss items and batch information.
         """
-        trimap = inputs[:, 3:, :, :]
         gt_alpha = data_samples.gt_alpha
         t = data_samples.t
         pred_alpha = self._forward(inputs,t)

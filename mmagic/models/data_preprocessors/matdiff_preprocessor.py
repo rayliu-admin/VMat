@@ -171,8 +171,8 @@ class MatdiffPreprocessor(DataPreprocessor):
         data = super().forward(data, training=training)
 
         batch_images = data['inputs']
-        batch_trimaps = data['data_samples'].trimap
-        batch_trimaps = self._proc_batch_trimap(batch_trimaps)
+        # batch_trimaps = data['data_samples'].trimap
+        # batch_trimaps = self._proc_batch_trimap(batch_trimaps)
 
         # Stack image and trimap along channel dimension
         # All existing models do concat at the start of forwarding
@@ -180,17 +180,18 @@ class MatdiffPreprocessor(DataPreprocessor):
         # so this is a simple work-around to make codes simpler
         # print(f"batch_trimap.dtype = {batch_trimap.dtype}")
 
-        assert batch_images.ndim == batch_trimaps.ndim == 4
-        assert batch_images.shape[-2:] == batch_trimaps.shape[-2:], (
-            'Expect merged.shape[-2:] == trimap.shape[-2:], '
-            f'but got {batch_images.shape[-2:]} vs {batch_trimaps.shape[-2:]}')
+        # assert batch_images.ndim == batch_trimaps.ndim == 4
+        # assert batch_images.shape[-2:] == batch_trimaps.shape[-2:], (
+        #     'Expect merged.shape[-2:] == trimap.shape[-2:], '
+        #     f'but got {batch_images.shape[-2:]} vs {batch_trimaps.shape[-2:]}')
 
 
         # diffusion preprocessor
-        
-        t = self.uniform_sampler(self.num_timesteps, img.shape[0], current_device)
-        x_t = self.q_sample(target, x_last, t, current_device)
-        z_t = torch.cat((img, x_t), dim=1)
+        current_device = batch_images.device
+        coarse_mask = data['data_samples'].coarse_masks
+        gt_alpha = data['data_samples'].gt_alpha
+        t = self.uniform_sampler(self.num_timesteps, batch_images.shape[0], current_device)
+        x_t = self.q_sample(gt_alpha, coarse_mask, t, current_device)
 
         # N, (4/6), H, W
         batch_inputs = torch.cat((batch_images, x_t), dim=1)
