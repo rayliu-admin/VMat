@@ -53,7 +53,9 @@ class MatdiffPreprocessor(DataPreprocessor):
                  std: MEAN_STD_TYPE = [58.395, 57.12, 57.375],
                  output_channel_order: str = 'RGB',
                  proc_trimap: str = 'rescale_to_zero_one',
-                 stack_data_sample=True):
+                 num_timesteps = 6,
+                 stack_data_sample=True,
+                 diffusion_cfg = None):
         # specific data_keys for matting task
         data_keys = ['gt_fg', 'gt_bg', 'gt_merged', 'gt_alpha']
         super().__init__(
@@ -64,7 +66,22 @@ class MatdiffPreprocessor(DataPreprocessor):
             stack_data_sample=stack_data_sample)
 
         self.proc_trimap = proc_trimap
+        self.num_timesteps = num_timesteps
+        self._diffusion_init(diffusion_cfg)
         # self.proc_gt = proc_gt
+
+    def _diffusion_init(self, diffusion_cfg):
+        self.diff_iter = diffusion_cfg['diff_iter']
+        betas = diffusion_cfg['betas']
+        self.eps = 1.e-6
+        self.betas_cumprod = np.linspace(
+            betas['start'], betas['stop'], 
+            betas['num_timesteps'])
+        betas_cumprod_prev = self.betas_cumprod[:-1]
+        self.betas_cumprod_prev = np.insert(betas_cumprod_prev, 0, 1)
+        self.betas = self.betas_cumprod / self.betas_cumprod_prev
+        self.num_timesteps = self.betas_cumprod.shape[0]
+
 
     def _proc_batch_trimap(self, batch_trimaps: torch.Tensor):
 
@@ -135,7 +152,7 @@ class MatdiffPreprocessor(DataPreprocessor):
 
         return data_samples
     
-    def uniform_sampler(num_steps, batch_size, device):
+    def uniform_sampler(self,num_steps, batch_size, device):
         all_indices = np.arange(num_steps)
         indices_np = np.random.choice(all_indices, size=(batch_size,))
         indices = torch.from_numpy(indices_np).long().to(device)
@@ -195,8 +212,8 @@ class MatdiffPreprocessor(DataPreprocessor):
 
         # N, (4/6), H, W
         batch_inputs = torch.cat((batch_images, x_t), dim=1)
-
+        
         # TODO: need pass t to model
         data['data_samples'].t = t
-        data['inputs'] = batch_inputs
+        data['inputs'] = batch_inputs.float()
         return data

@@ -42,18 +42,18 @@ import cv2
 class LoadCoarseMasks(BaseTransform):
     def __init__(self,
                  test_mode=False):
+        super().__init__()
         self.test_mode = test_mode
 
-    def __call__(self, results):
-        h, w = results['img_shape'][:2]
-        
+    def transform(self, results):
         if not self.test_mode:
             alpha = results['alpha']
-            gt_mask = np.zeros_like(alpha)
+            gt_mask = np.zeros(alpha.shape, dtype=np.uint8)
             gt_mask[alpha >= 128] = 255
             gt_mask[alpha <= 128] = 0
-            coarse_masks = modify_boundary(gt_mask)
+            coarse_masks = modify_boundary(gt_mask.copy())
             results['coarse_masks'] = coarse_masks
+            results['fine_masks'] = gt_mask
         else:
             print('todo: imread coarse mask')
             # coarse_masks = results['coarse_info']['masks']
@@ -65,6 +65,10 @@ class LoadCoarseMasks(BaseTransform):
         # results['mask_fields'].append('coarse_masks')
 
         return results
+       
+    def __repr__(self):
+        return self.__class__.__name__ + (
+            f'(img_key={repr(self.test_mode)}, ')
 
 
 def get_random_structure(size):

@@ -19,7 +19,7 @@ from .generate_assistant import (GenerateCoordinateAndCell,
 from .generate_frame_indices import (GenerateFrameIndices,
                                      GenerateFrameIndiceswithPadding,
                                      GenerateSegmentIndices)
-from .get_masked_image import GetMaskedImage, LoadCoarseMasks
+from .get_masked_image import LoadCoarseMasks, GetMaskedImage
 from .loading import (GetSpatialDiscountMask, LoadImageFromFile, LoadMask,
                       LoadPairedImageFromFile)
 from .matlab_like_resize import MATLABLikeResize

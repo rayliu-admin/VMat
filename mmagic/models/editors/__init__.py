@@ -68,8 +68,10 @@ from .tof import TOFlowVFINet, TOFlowVSRNet, ToFResBlock
 from .ttsr import LTE, TTSR, SearchTransformer, TTSRDiscriminator, TTSRNet
 from .vico import ViCo
 from .wgan_gp import WGANGP
+from .matrefiner import MATREFINER,DenoiseUNet
 
 __all__ = [
+    'MATREFINER','DenoiseUNet',
     'AOTEncoderDecoder', 'AOTBlockNeck', 'AOTInpaintor',
     'ContextualAttentionNeck', 'ContextualAttentionModule', 'CAIN', 'CAINNet',
     'DIM', 'DIC', 'DICNet', 'LightCNN', 'FeedbackBlock',

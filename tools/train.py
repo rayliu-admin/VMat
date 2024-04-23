@@ -6,6 +6,8 @@ import os.path as osp
 
 from mmengine.config import Config, DictAction
 from mmengine.runner import Runner
+from mmagic.utils import register_all_modules
+
 
 from mmagic.utils import print_colored_log
 
@@ -53,6 +55,7 @@ def parse_args():
 
 def main():
     args = parse_args()
+    register_all_modules(init_default_scope=True)
 
     # load config
     cfg = Config.fromfile(args.config)

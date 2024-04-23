@@ -1,1 +1,1 @@
-python tools/train.py configs/gca/gca_r34_4xb10-200k_comp1k_m.py
+python tools/train.py configs/matrefiner/mat_diffusion_xxx-10k_comp1k.py
