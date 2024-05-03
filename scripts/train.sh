@@ -1,1 +1,1 @@
-python tools/train.py configs/matrefiner/mat_diffusion_xxx-10k_comp1k.py
+python tools.train configs/matrefiner/mat_diffusion_xxx-10k_comp1k.py

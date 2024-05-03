@@ -1,5 +1,5 @@
 _base_ = [
-    '../_base_/datasets/comp1k.py', '../_base_/matting_default_runtime.py'
+    'configs/_base_/datasets/comp1k.py', 'configs/_base_/matting_default_runtime.py'
 ]
 
 experiment_name = 'mat_diffusion_xxx-10k_comp1k'
@@ -137,7 +137,7 @@ test_cfg = dict(type='MultiTestLoop')
 # optimizer
 optim_wrapper = dict(
     constructor='DefaultOptimWrapperConstructor',
-    type='OptimWrapper',
+    type='AmpOptimWrapper',
     optimizer=dict(type='Adam', lr=4e-4, betas=[0.5, 0.999]))
 
 # learning policy
